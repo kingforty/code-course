@@ -1,0 +1,119 @@
+<!DOCTYPE HTML><html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { text-align:center; }
+    .vert { margin-bottom: 10%; }
+    .hori{ margin-bottom: 0%; }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h2>ESP32-CAM Last Photo</h2>
+    <h1>Cilick Image For Save!</h1>
+    <p>It might take more than 5 seconds to capture a photo.</p>
+    <p>
+      <button onclick="rotatePhoto();">ROTATE</button>
+      <button onclick="capturePhoto()">TAKE PHOTO</button>
+      <button onclick="location.reload();">REFRESH PAGE</button>
+      <button onclick="saveImage()">SAVE IMAGE</button>
+    </p>
+  </div>
+  
+https://csit.nu.ac.th/wp-content/uploads/2020/01/F05009-1-256x300.jpg
+  <div><img src="saved-photo\Wutt.jpg" id="photo" width="15%"></div>
+  <div><canvas width="500" height="500" id="canvas">canvas</canvas></div>
+</body>
+
+<script>
+      window.onload = function() {
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        var img = document.getElementById("photo");
+        ctx.drawImage(img, 0, 0);
+      }
+      
+
+
+  var deg = 0;
+  function capturePhoto() {
+    var xhr = new XMLHttpRequest();
+    //xhr.open('GET', "capture", true);
+    
+    xhr.open('GET', "http://127.0.0.1:8080", true);
+    xhr.send();
+  }
+
+  function rotatePhoto() {
+    var img = document.getElementById("photo");
+    deg += 90;
+    if(isOdd(deg/90)){ document.getElementById("container").className = "vert"; }
+    else{ document.getElementById("container").className = "hori"; }
+    img.style.transform = "rotate(" + deg + "deg)";
+  }
+  function isOdd(n) { return Math.abs(n % 2) == 1; }
+
+
+  function saveImage() {
+        var imgsrc = document.getElementById("photo").getAttribute('src');
+        alert(imgsrc);
+        data=getDataUrl(imgsrc);
+        
+        
+
+        var http = new XMLHttpRequest();
+        
+        var  path = "http://127.0.0.1:8080/?data="+data;
+        http.onreadystatechange = function(err) {
+            if (http.readyState == 4 && http.status == 200){
+                console.log(http.responseText);
+            } else {
+                console.log('Wait');
+                console.log(err);
+            }
+        };
+
+        http.open("GET", path, true);
+        http.send();
+      }
+
+    function getDataUrl(imgsrc) {
+        
+        // Create canvas
+       var canvas = document.getElementById("canvas");
+       var ctx = canvas.getContext("2d");
+       var img = document.getElementById("photo");
+       // Set width and height
+       //canvas.width = img.width;
+       //canvas.height = img.height;
+       var img2=new Image(img.width,img.height);
+       img2.crossOrigin="anonymous";
+       img2.src = imgsrc;
+       document.body.appendChild(img2);
+       // Draw the image
+       //ctx.drawImage(img2, 10, 10);
+       //return canvas.toDataURL('image/jpg');
+       return 'xxx';
+  }
+  function imageReceived(downloadedImg) {
+    let canvas = document.createElement("canvas");
+    let context = canvas.getContext("2d");
+
+    canvas.width = downloadedImg.width;
+    canvas.height = downloadedImg.height;
+
+    context.drawImage(downloadedImg, 0, 0);
+    //imageBox.appendChild(canvas);
+    alert(downloadedImg.scr);
+    try {
+      //localStorage.setItem("saved-image-example", canvas.toDataURL("image/png"));
+    }
+    catch(err) {
+      console.log("Error: " + err);
+    }
+}
+  
+
+
+</script>
+</html>
